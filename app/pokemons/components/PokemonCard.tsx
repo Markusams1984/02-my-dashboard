@@ -21,12 +21,13 @@ export const PokemonCard = ({ pokemon }: Props) => {
                         width={100}
                         height={100}
                         alt={pokemon.name}
+                        priority={ false }
                         />
                     
                     <p className="text-base font-bold text-gray-100 capitalize">{ name }</p>
                     <div className="mt-5">
                         <Link
-                            href={`/pokemon/${id}`}
+                            href={`dashboard/pokemon/${id}`}
                             className="border rounded-full py-2 px-4 text-xs font-semibold text-gray-100"
                         >
                             Mas informacion
