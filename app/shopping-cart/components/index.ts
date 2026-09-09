@@ -1,2 +1,0 @@
-
-export { CartCounter } from "./CartCounter";
