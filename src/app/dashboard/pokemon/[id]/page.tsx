@@ -1,6 +1,7 @@
 import { Pokemon } from "@/pokemons/interfaces/pokemon";
 import { Metadata } from "next";
 import Image from "next/image";
+import { notFound } from "next/navigation";
 
 interface Props {
   params: Promise<{
@@ -10,27 +11,41 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
-  const { id } = await params;
-  const pokemon = await getPokemon(id); 
-  const imagen = pokemon.sprites.other?.['official-artwork'].front_default;
+  try {
+    const { id } = await params;
+    const pokemon = await getPokemon(id); 
+    const imagen = pokemon.sprites.other?.['official-artwork'].front_default;
 
-  return {
-    title: `Pokemon ${id} - ${pokemon.name}`,
-    description: `Details about ${pokemon.name}`,
-    openGraph: {
-    title: `Pokemon ${pokemon.id} - ${pokemon.name}`,
-    description: `Details about ${pokemon.name}`,
-    images: imagen ? [imagen] : [],
-  },
+    return {
+      title: `Pokemon ${id} - ${pokemon.name}`,
+      description: `Details about ${pokemon.name}`,
+      openGraph: {
+      title: `Pokemon ${pokemon.id} - ${pokemon.name}`,
+      description: `Details about ${pokemon.name}`,
+      images: imagen ? [imagen] : [],
+    },
+  }
+  } catch (error) {
+    return {
+      title: 'Pokemon not found',
+      description: 'The requested Pokemon could not be found.',
+    };
   }
 }
 
 const getPokemon = async (id: string): Promise<Pokemon> => {
-  const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`,{
-    cache: 'force-cache'
-  }).then(res => res.json());
+  try {
+    const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+      cache: 'force-cache'
+    }).then(res => res.json());
 
-  return pokemon;
+    if (!pokemon.name) notFound()
+    console.log('se cargo:', pokemon.name);
+
+    return pokemon;
+  } catch (error) {
+    notFound();
+  }
 }
 
 export default async function PokemonPage({ params }: Props) {
@@ -40,7 +55,7 @@ export default async function PokemonPage({ params }: Props) {
   
   return (
     <div className="flex mt-5 flex-col items-center text-slate-800">
-      <div className="relative flex flex-col items-center rounded-[20px] w-[700px] mx-auto bg-white bg-clip-border  shadow-lg  p-3">
+      <div className="relative flex flex-col items-center rounded-[20px] w-175 mx-auto bg-white bg-clip-border  shadow-lg  p-3">
         <div className="mt-2 mb-8 w-full">
           <h1 className="px-2 text-xl font-bold text-slate-700 capitalize">
             #{pokemon.id} {pokemon.name}
